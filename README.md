@@ -1,6 +1,6 @@
 # EventManager
 
-# CRUD Operations
+# 1. CRUD Operations
 
 # Authentication
 | Method | Endpoint       | Description                     |
@@ -9,7 +9,7 @@
 | POST   | /auth/login    | login user(email, hashPassword) |
 | POST   | /auth/logout   | logout current user             |
 
-# Users
+# User
 | Method | Endpoint    | Description              |
 |--------|-------------|--------------------------|
 | GET    | /users      | Get all users (admin)    |
@@ -30,7 +30,7 @@
 | DELETE | /events/{id}     | Delete event (organizer, admin) |
 
 
-# Tickets
+# Ticket
 | Method | Endpoint                       | Description                  |
 |--------|--------------------------------|------------------------------|
 | POST   | /events/{eventID}/tickets      | Create ticket                |
@@ -73,6 +73,6 @@
 | POST   | /speakers/{speakerId}/materials | Upload material         |
 | DELETE | /materials/{id}                 | Delete material         |
 
-# DataBase SQL Scheme
+# 2. DataBase SQL Scheme
 
 ![alt text](EventManager_DB_Diagram.jpg)
