@@ -28,4 +28,18 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handlerIllegalArgument(
+            IllegalArgumentException ex, HttpServletRequest req) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                req.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(errorResponse);
+    }
 }
