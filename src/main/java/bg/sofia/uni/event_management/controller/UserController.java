@@ -2,9 +2,10 @@ package bg.sofia.uni.event_management.controller;
 
 import bg.sofia.uni.event_management.dto.UserResponse;
 import bg.sofia.uni.event_management.service.UserService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,8 +19,18 @@ public class UserController {
     }
 
     @GetMapping()
+    @Operation(summary = "Get all users")
     public List<UserResponse> getAllUsers() {
         return userService.getAllUsers();
     }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get user by id")
+    @ApiResponse(responseCode = "200", description = "User found")
+    @ApiResponse(responseCode = "404", description = "User not found")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
 
 }
