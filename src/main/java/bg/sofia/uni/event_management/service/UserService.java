@@ -51,4 +51,12 @@ public class UserService {
 
        // userRepository.save(user);
     }
+
+    public void deleteUser(long id) {
+        if (!userRepository.existsById(id)) {
+            throw new NotFoundException("User is not found!");
+        }
+
+        userRepository.deleteById(id);
+    }
 }

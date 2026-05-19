@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
     private final UserService userService;
 
     public UserController(UserService userService) {
@@ -42,7 +43,7 @@ public class UserController {
     @ApiResponse(responseCode = "400", description = "User failed to update")
     public ResponseEntity<Void> updateUser(
             @Parameter(description = "User id")
-            @PathVariable Long id,
+            @PathVariable long id,
 
             @RequestBody @Valid UserRequest req
     ) {
@@ -51,5 +52,14 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete user")
+    @ApiResponse(responseCode = "204", description = "User deleted")
+    @ApiResponse(responseCode = "404", description = "User not found")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
 
 }
