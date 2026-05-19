@@ -3,6 +3,8 @@ package bg.sofia.uni.event_management.model;
 import bg.sofia.uni.event_management.model.enums.Role;
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "users")
 public class User {
