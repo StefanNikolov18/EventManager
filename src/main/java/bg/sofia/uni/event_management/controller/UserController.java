@@ -22,6 +22,8 @@ public class UserController {
         this.userService = userService;
     }
 
+    // ===================== ADMIN ENDPOINTS =====================
+
     @GetMapping()
     @Operation(summary = "Get all users")
     public List<UserResponse> getAllUsers() {
@@ -60,6 +62,43 @@ public class UserController {
 
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ===================== CURRENT USER (JWT) =====================
+    @GetMapping("/me")
+    @Operation(summary = "Get current user profile")
+    @ApiResponse(responseCode = "200", description = "User found")
+    public ResponseEntity<UserResponse> getCurrentUser() {
+        long currentUserId = getCurrentUserId(); // TODO: replace with JWT
+        return ResponseEntity.ok(userService.getUserById(currentUserId));
+    }
+
+    @PutMapping("/me")
+    @Operation(summary = "Update current user")
+    @ApiResponse(responseCode = "200", description = "User updated")
+    @ApiResponse(responseCode = "400", description = "User failed to update")
+    public ResponseEntity<Void> updateCurrentUser(@RequestBody @Valid UserRequest req) {
+        long currentUserId = getCurrentUserId(); // TODO: replace with JWT
+        userService.updateUser(currentUserId, req);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/me")
+    @Operation(summary = "Delete current user")
+    @ApiResponse(responseCode = "204", description = "User deleted")
+    public ResponseEntity<Void> deleteCurrentUser() {
+        long currentUserId = getCurrentUserId(); // TODO: replace with JWT
+        userService.deleteUser(currentUserId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ===================== HELPERS =====================
+
+    private long getCurrentUserId() {
+        // TODO: replace with
+        // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // return ((UserDetails) auth.getPrincipal()).getId();
+        return 1L; // hardcoded placeholder за сега
     }
 
 }
