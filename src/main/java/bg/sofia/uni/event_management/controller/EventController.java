@@ -38,9 +38,8 @@ public class EventController {
         @RequestParam(required = false) Long organizerId,
         @RequestParam(required = false) Long categoryId
     ) {
-        // За момента просто връща всички събития.
-        // По-късно да се добави филтриране по параметрите.
-        return eventService.getAllEvents();
+
+        return eventService.getEvents(title, venue, organizerId, categoryId);
     }
 
     @GetMapping("/{id}")

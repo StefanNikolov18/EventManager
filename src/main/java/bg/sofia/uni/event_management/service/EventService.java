@@ -2,8 +2,11 @@ package bg.sofia.uni.event_management.service;
 
 import bg.sofia.uni.event_management.dto.EventRequest;
 import bg.sofia.uni.event_management.dto.EventResponse;
+import bg.sofia.uni.event_management.exceptions.AccessDeniedException;
+import bg.sofia.uni.event_management.exceptions.NotFoundException;
 import bg.sofia.uni.event_management.model.Event;
 import bg.sofia.uni.event_management.model.User;
+import bg.sofia.uni.event_management.model.enums.Role;
 import bg.sofia.uni.event_management.repository.EventRepository;
 import bg.sofia.uni.event_management.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -28,17 +31,34 @@ public class EventService {
             .toList();
     }
 
+    public List<EventResponse> getEvents(
+        String title,
+        String venue,
+        Long organizerId,
+        Long categoryId
+    ) {
+        return eventRepository.findAll()
+            .stream()
+            .filter(e -> title == null || e.getTitle().toLowerCase().contains(title.toLowerCase()))
+            .filter(e -> venue == null || e.getVenue().equalsIgnoreCase(venue))
+            .filter(e -> organizerId == null || e.getOrganizer().getId().equals(organizerId))
+            .filter(e -> categoryId == null ||
+                e.getCategories().stream().anyMatch(c -> c.getId().equals(categoryId)))
+            .map(EventResponse::from)
+            .toList();
+    }
+
     public EventResponse getEventById(Long id) {
         Event event = eventRepository.findById(id)
             .orElseThrow(() ->
-                new RuntimeException("Event not found with id " + id));
+                new NotFoundException("Event is missing with id: " + id));
 
         return EventResponse.from(event);
     }
 
     public EventResponse createEvent(Long organizerId, EventRequest request) {
         User organizer = userRepository.findById(organizerId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new NotFoundException("User is missing with id: " + organizerId));
 
         Event event = new Event();
 
@@ -61,10 +81,10 @@ public class EventService {
     public void updateEvent(Long currentUserId, Long id, EventRequest request) {
         Event event = eventRepository.findById(id)
             .orElseThrow(() ->
-                new RuntimeException("Event not found with id " + id));
+                new NotFoundException("Event is missing with id: " + id));
 
         if (!event.getOrganizer().getId().equals(currentUserId)) {
-            throw new RuntimeException("You are not allowed to update this event.");
+            throw new AccessDeniedException("You are not allowed to update this event.");
         }
 
         event.setTitle(request.title());
@@ -78,17 +98,23 @@ public class EventService {
         if (event.getAvailableTickets() > request.capacity()) {
             event.setAvailableTickets(request.capacity());
         }
-        //не нужно заради Transactional
-        //eventRepository.save(event);
+        // не нужно заради Transactional
+        // eventRepository.save(event);
     }
 
     public void deleteEvent(Long currentUserId, Long eventId) {
         Event event = eventRepository.findById(eventId)
             .orElseThrow(() ->
-                new RuntimeException("Event not found with id " + eventId));
-        // To do: add admin
-        if (!event.getOrganizer().getId().equals(currentUserId)) {
-            throw new RuntimeException("You are not allowed to delete this event.");
+                new NotFoundException("Event is missing with id: " + eventId));
+
+        User currentUser = userRepository.findById(currentUserId)
+            .orElseThrow(() -> new NotFoundException("User is missing with id: " + currentUserId));
+
+        boolean isOrganizer = event.getOrganizer().getId().equals(currentUserId);
+        boolean isAdmin = currentUser.getRole() == Role.ADMIN;
+
+        if (!isOrganizer && !isAdmin) {
+            throw new AccessDeniedException("You are not allowed to delete this event.");
         }
 
         eventRepository.delete(event);
