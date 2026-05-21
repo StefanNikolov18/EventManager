@@ -28,4 +28,11 @@ public class AuthenticationController {
     ) {
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        //  Might add the token to a blacklist here
+        // For now, we just return success - client should discard the token
+        return ResponseEntity.ok().build();
+    }
 }
