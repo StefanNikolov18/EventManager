@@ -1,5 +1,6 @@
 package bg.sofia.uni.event_management.service;
 
+import bg.sofia.uni.event_management.dto.AdminRequest;
 import bg.sofia.uni.event_management.dto.UserRequest;
 import bg.sofia.uni.event_management.dto.UserResponse;
 import bg.sofia.uni.event_management.exceptions.NotFoundException;
@@ -19,6 +20,8 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    // =================== ADMIN ===========================
+
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserResponse::from)
@@ -33,7 +36,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(long id, UserRequest req) {
+    public void updateUser(long id, AdminRequest req) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User is missing with id: " + id));
 
@@ -48,8 +51,6 @@ public class UserService {
         user.setFirstName(req.firstName());
         user.setLastName(req.lastName());
         user.setRole(roleEnum);
-
-       // userRepository.save(user);
     }
 
     public void deleteUser(long id) {
@@ -59,4 +60,35 @@ public class UserService {
 
         userRepository.deleteById(id);
     }
+
+    // ===================== CURRENT USER (JWT) =====================
+
+    public UserResponse getByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new NotFoundException("User not found with email: " + email));
+
+        return UserResponse.from(user);
+    }
+
+    @Transactional
+    public void updateByEmail(String email, UserRequest req) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new NotFoundException("User not found with email: " + email));
+
+        user.setEmail(req.email());
+        user.setFirstName(req.firstName());
+        user.setLastName(req.lastName());
+
+    }
+
+    public void deleteByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new NotFoundException("User not found with email: " + email));
+
+        userRepository.delete(user);
+    }
+
 }
