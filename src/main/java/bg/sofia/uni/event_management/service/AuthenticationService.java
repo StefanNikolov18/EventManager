@@ -3,6 +3,7 @@ package bg.sofia.uni.event_management.service;
 import bg.sofia.uni.event_management.dto.AuthenticationRequest;
 import bg.sofia.uni.event_management.dto.AuthenticationResponse;
 import bg.sofia.uni.event_management.dto.RegisterRequest;
+import bg.sofia.uni.event_management.exceptions.NotFoundException;
 import bg.sofia.uni.event_management.model.User;
 import bg.sofia.uni.event_management.model.enums.Role;
 import bg.sofia.uni.event_management.repository.UserRepository;
@@ -50,7 +51,7 @@ public class AuthenticationService {
                 )
         );
         var user = userRepository.findByEmail(request.email())
-                .orElseThrow();
+                .orElseThrow(() -> new NotFoundException("Invalid email or password"));
 
         var userDetails = org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())

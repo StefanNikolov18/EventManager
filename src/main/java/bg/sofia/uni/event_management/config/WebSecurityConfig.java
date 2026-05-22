@@ -1,6 +1,7 @@
 package bg.sofia.uni.event_management.config;
 
 import bg.sofia.uni.event_management.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,13 +33,44 @@ public class WebSecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .exceptionHandling(ex -> ex
+                        // 401 - not authenticated
+                        .authenticationEntryPoint((req, res, authException) -> {
+                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            res.setContentType("application/json");
+
+                            res.getWriter().write("""
+                    {
+                        "status": 401,
+                        "error": "Unauthorized",
+                        "message": "You must login to access this resource",
+                        "path": "%s"
+                    }
+                """.formatted(req.getRequestURI()));
+                        })
+
+                        // 403 - authenticated but no permission
+                        .accessDeniedHandler((req, res, accessDeniedException) -> {
+                            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            res.setContentType("application/json");
+
+                            res.getWriter().write("""
+                    {
+                        "status": 403,
+                        "error": "Forbidden",
+                        "message": "You don't have permission",
+                        "path": "%s"
+                    }
+                """.formatted(req.getRequestURI()));
+                        })
+                )
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/users/me/**").authenticated()
                         .requestMatchers("/users/**").hasRole("ADMIN")
-                        .anyRequest().denyAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
