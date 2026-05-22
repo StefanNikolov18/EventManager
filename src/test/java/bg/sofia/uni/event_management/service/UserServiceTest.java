@@ -1,5 +1,6 @@
 package bg.sofia.uni.event_management.service;
 
+import bg.sofia.uni.event_management.dto.AdminRequest;
 import bg.sofia.uni.event_management.dto.UserRequest;
 import bg.sofia.uni.event_management.dto.UserResponse;
 import bg.sofia.uni.event_management.exceptions.NotFoundException;
@@ -94,7 +95,7 @@ public class UserServiceTest {
     void testUpdateUserThrowsNotFoundException() {
         when(userRepository.findById(any())).thenThrow(NotFoundException.class);
 
-        UserRequest req = new UserRequest("test@test.com", "Test", "Testov", "admin");
+        AdminRequest req = new AdminRequest("test@test.com", "Test", "Testov", "admin");
 
         assertThrows(NotFoundException.class,
                 () -> userService.updateUser(1L, req));
@@ -104,7 +105,7 @@ public class UserServiceTest {
     void testUpdateUserNotValidRoleThrowsIllegalArgumentException() {
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
 
-        UserRequest req = new UserRequest("test@test.com",
+        AdminRequest req = new AdminRequest("test@test.com",
                 "Test", "Testov", "NotValidRole");
 
         assertThrows(IllegalArgumentException.class,
@@ -115,7 +116,7 @@ public class UserServiceTest {
     void testUpdateUserUpdateUserEmail() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        UserRequest req = new UserRequest("testUpdate@test.com",
+        AdminRequest req = new AdminRequest("testUpdate@test.com",
                 "Test", "Testov", "User");
 
         userService.updateUser(1L, req);

@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/EventManager
-    username: postgres
-    password: password
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -14,7 +14,7 @@ spring:
       hibernate:
         default_schema: events
         format_sql: true
-    show-sql: true
+        show-sql: true
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml

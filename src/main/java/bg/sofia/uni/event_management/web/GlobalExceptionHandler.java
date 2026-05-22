@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.security.sasl.AuthenticationException;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
@@ -57,5 +58,16 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
             .body(errorResponse);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuth(AuthenticationException ex, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse(
+                        LocalDateTime.now(),
+                        401,
+                        "Invalid email or password",
+                        req.getRequestURI()
+                ));
     }
 }
