@@ -8,4 +8,20 @@ import java.util.List;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
+    /*
+    // всички събития на даден организатор
+    List<Event> findByOrganizerId(Long organizerId);
+
+    // търсене по заглавие (частично)
+    List<Event> findByTitleContainingIgnoreCase(String title);
+
+    // търсене по venue (частично)
+    List<Event> findByVenueContainingIgnoreCase(String venue);
+
+    // комбиниран филтър (ако искаш basic search)
+    List<Event> findByTitleContainingIgnoreCaseAndVenueContainingIgnoreCase(
+            String title,
+            String venue
+    );
+     */
 }

@@ -31,7 +31,6 @@ public record EventRequest(
     @Min(value = 0, message = "Available tickets cannot be negative")
     Integer availableTickets,
 
-    // IDs of categories associated with this event
     Set<Long> categoryIds
 ) {
 }
