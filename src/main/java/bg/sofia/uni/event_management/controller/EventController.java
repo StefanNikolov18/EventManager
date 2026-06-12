@@ -2,7 +2,9 @@ package bg.sofia.uni.event_management.controller;
 
 import bg.sofia.uni.event_management.dto.EventRequest;
 import bg.sofia.uni.event_management.dto.EventResponse;
+import bg.sofia.uni.event_management.dto.UserResponse;
 import bg.sofia.uni.event_management.service.EventService;
+import bg.sofia.uni.event_management.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,8 +26,11 @@ import java.util.List;
 @RequestMapping("/events")
 public class EventController {
     private final EventService eventService;
-    public EventController(EventService eventService) {
+    private final UserService userService;
+
+    public EventController(EventService eventService, UserService userService) {
         this.eventService = eventService;
+        this.userService = userService;
     }
 
     // ===================== PUBLIC ENDPOINTS =====================
@@ -62,7 +67,9 @@ public class EventController {
     public ResponseEntity<EventResponse> createEvent(
         @RequestBody @Valid EventRequest req
     ) {
-        long currentUserId = getCurrentUserId(); // TODO: replace with JWT
+        String email = getCurrentEmail();
+        UserResponse user = userService.getByEmail(email);
+        Long currentUserId = user.id();
 
         EventResponse created = eventService.createEvent(currentUserId, req);
 
@@ -80,7 +87,9 @@ public class EventController {
 
         @RequestBody @Valid EventRequest req
     ) {
-        long currentUserId = getCurrentUserId(); // TODO: replace with JWT
+        String email = getCurrentEmail();
+        UserResponse user = userService.getByEmail(email);
+        Long currentUserId = user.id();
         eventService.updateEvent(currentUserId, id, req);
 
         return ResponseEntity.ok().build();
@@ -94,7 +103,9 @@ public class EventController {
         @Parameter(description = "Event id")
         @PathVariable Long id
     ) {
-        long currentUserId = getCurrentUserId(); // TODO: replace with JWT
+        String email = getCurrentEmail();
+        UserResponse user = userService.getByEmail(email);
+        Long currentUserId = user.id();
         eventService.deleteEvent(currentUserId, id);
 
         return ResponseEntity.noContent().build();
@@ -102,9 +113,11 @@ public class EventController {
 
     // ===================== HELPERS =====================
 
-    private long getCurrentUserId() {
-        // TODO: replace with JWT authentication
-        return 1L; // hardcoded placeholder for now
+    private String getCurrentEmail() {
+        return org.springframework.security.core.context.SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
     }
 }
 
