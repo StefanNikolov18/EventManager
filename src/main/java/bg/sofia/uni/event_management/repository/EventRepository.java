@@ -2,26 +2,33 @@ package bg.sofia.uni.event_management.repository;
 
 import bg.sofia.uni.event_management.model.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
-    /*
-    // всички събития на даден организатор
+
     List<Event> findByOrganizerId(Long organizerId);
 
-    // търсене по заглавие (частично)
     List<Event> findByTitleContainingIgnoreCase(String title);
 
-    // търсене по venue (частично)
     List<Event> findByVenueContainingIgnoreCase(String venue);
 
-    // комбиниран филтър (ако искаш basic search)
-    List<Event> findByTitleContainingIgnoreCaseAndVenueContainingIgnoreCase(
-            String title,
-            String venue
+    @Query(value = """
+        SELECT DISTINCT e.* FROM events e
+        LEFT JOIN event_categories ec ON e.id = ec.event_id
+        WHERE (:title IS NULL OR e.title ILIKE CONCAT('%', CAST(:title AS text), '%'))
+          AND (:venue IS NULL OR e.venue ILIKE CAST(:venue AS text))
+          AND (:organizerId IS NULL OR e.organizer_id = :organizerId)
+          AND (:categoryId IS NULL OR ec.category_id = :categoryId)
+        """, nativeQuery = true)
+    List<Event> findFiltered(
+        @Param("title") String title,
+        @Param("venue") String venue,
+        @Param("organizerId") Long organizerId,
+        @Param("categoryId") Long categoryId
     );
-     */
 }
