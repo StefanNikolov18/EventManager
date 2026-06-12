@@ -1,7 +1,9 @@
 package bg.sofia.uni.event_management.controller;
 
 import bg.sofia.uni.event_management.dto.RegistrationResponse;
+import bg.sofia.uni.event_management.dto.UserResponse;
 import bg.sofia.uni.event_management.service.RegistrationService;
+import bg.sofia.uni.event_management.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +15,12 @@ import java.util.List;
 public class RegistrationController {
 
     private final RegistrationService registrationService;
+    private final UserService userService;
 
-    public RegistrationController(RegistrationService registrationService) {
+    public RegistrationController(RegistrationService registrationService,
+                                  UserService userService) {
         this.registrationService = registrationService;
+        this.userService = userService;
     }
 
     // ===================== EVENT REGISTRATIONS =====================
@@ -45,7 +50,9 @@ public class RegistrationController {
     public ResponseEntity<RegistrationResponse> create(
         @PathVariable Long eventId
     ) {
-        long currentUserId = getCurrentUserId(); // TODO: JWT later
+        String email = getCurrentEmail();
+        UserResponse user = userService.getByEmail(email);
+        Long currentUserId = user.id();
 
         RegistrationResponse response =
             registrationService.create(currentUserId, eventId);
@@ -76,9 +83,12 @@ public class RegistrationController {
         return ResponseEntity.noContent().build();
     }
 
-    // ===================== TEMP JWT PLACEHOLDER =====================
+    // ===================== HELPER =====================
 
-    private long getCurrentUserId() {
-        return 1L; // placeholder
+    private String getCurrentEmail() {
+        return org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
     }
 }

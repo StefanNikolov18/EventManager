@@ -105,7 +105,7 @@ public class RegistrationService {
             .orElseThrow(() ->
                 new NotFoundException("Registration not found with id: " + id));
 
-        // пример: toggle status (можеш да го промениш после)
+        // toggle status
         if (reg.getStatus() == RegistrationStatus.CONFIRMED) {
             reg.setStatus(RegistrationStatus.CANCELLED);
         } else {
@@ -124,7 +124,7 @@ public class RegistrationService {
             .orElseThrow(() ->
                 new NotFoundException("Registration not found with id: " + id));
 
-        // върни билет обратно
+        // give ticket back
         Event event = reg.getEvent();
         event.setAvailableTickets(event.getAvailableTickets() + 1);
 
