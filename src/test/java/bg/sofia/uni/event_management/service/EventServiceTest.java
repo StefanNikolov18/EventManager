@@ -7,6 +7,7 @@ import bg.sofia.uni.event_management.exceptions.NotFoundException;
 import bg.sofia.uni.event_management.model.Event;
 import bg.sofia.uni.event_management.model.User;
 import bg.sofia.uni.event_management.model.enums.Role;
+import bg.sofia.uni.event_management.repository.CategoryRepository;
 import bg.sofia.uni.event_management.repository.EventRepository;
 import bg.sofia.uni.event_management.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +37,9 @@ public class EventServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private CategoryRepository categoryRepository;
 
     @InjectMocks
     private EventService eventService;

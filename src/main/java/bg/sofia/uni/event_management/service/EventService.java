@@ -4,24 +4,32 @@ import bg.sofia.uni.event_management.dto.EventRequest;
 import bg.sofia.uni.event_management.dto.EventResponse;
 import bg.sofia.uni.event_management.exceptions.AccessDeniedException;
 import bg.sofia.uni.event_management.exceptions.NotFoundException;
+import bg.sofia.uni.event_management.model.Category;
 import bg.sofia.uni.event_management.model.Event;
 import bg.sofia.uni.event_management.model.User;
 import bg.sofia.uni.event_management.model.enums.Role;
+import bg.sofia.uni.event_management.repository.CategoryRepository;
 import bg.sofia.uni.event_management.repository.EventRepository;
 import bg.sofia.uni.event_management.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
-    public EventService(EventRepository eventRepository, UserRepository userRepository) {
+    public EventService(EventRepository eventRepository,
+                        UserRepository userRepository,
+                        CategoryRepository categoryRepository) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public List<EventResponse> getAllEvents() {
@@ -37,13 +45,8 @@ public class EventService {
         Long organizerId,
         Long categoryId
     ) {
-        return eventRepository.findAll()
+        return eventRepository.findFiltered(title, venue, organizerId, categoryId)
             .stream()
-            .filter(e -> title == null || e.getTitle().toLowerCase().contains(title.toLowerCase()))
-            .filter(e -> venue == null || e.getVenue().equalsIgnoreCase(venue))
-            .filter(e -> organizerId == null || e.getOrganizer().getId().equals(organizerId))
-            .filter(e -> categoryId == null ||
-                e.getCategories().stream().anyMatch(c -> c.getId().equals(categoryId)))
             .map(EventResponse::from)
             .toList();
     }
@@ -56,6 +59,7 @@ public class EventService {
         return EventResponse.from(event);
     }
 
+    @Transactional
     public EventResponse createEvent(Long organizerId, EventRequest request) {
         User organizer = userRepository.findById(organizerId)
             .orElseThrow(() -> new NotFoundException("User is missing with id: " + organizerId));
@@ -70,7 +74,15 @@ public class EventService {
         event.setCapacity(request.capacity());
         event.setAvailableTickets(request.capacity());
 
-        event.setOrganizer(organizer); // temporary placeholder
+        event.setOrganizer(organizer);
+
+        // resolve categories from IDs
+        if (request.categoryIds() != null && !request.categoryIds().isEmpty()) {
+            Set<Category> categories = new HashSet<>(
+                categoryRepository.findAllById(request.categoryIds())
+            );
+            event.setCategories(categories);
+        }
 
         Event saved = eventRepository.save(event);
 
