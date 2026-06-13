@@ -3,6 +3,7 @@ package bg.sofia.uni.event_management.controller;
 import bg.sofia.uni.event_management.dto.AdminRequest;
 import bg.sofia.uni.event_management.dto.UserRequest;
 import bg.sofia.uni.event_management.dto.UserResponse;
+import bg.sofia.uni.event_management.security.SecurityUtil;
 import bg.sofia.uni.event_management.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -76,7 +77,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User found")
     public ResponseEntity<UserResponse> getCurrentUser() {
         // Extract user ID from SecurityContext
-        String email = getCurrentEmail();
+        String email = SecurityUtil.getCurrentEmail();
 
         return ResponseEntity.ok(userService.getByEmail(email));
     }
@@ -87,9 +88,9 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User updated")
     @ApiResponse(responseCode = "400", description = "User failed to update")
     public ResponseEntity<Void> updateCurrentUser(@RequestBody @Valid UserRequest req) {
-        String email = getCurrentEmail();
+        String emailSec = SecurityUtil.getCurrentEmail();
 
-        userService.updateByEmail(email, req);
+        userService.updateByEmail(emailSec, req);
 
         return ResponseEntity.ok().build();
     }
@@ -100,7 +101,7 @@ public class UserController {
     @ApiResponse(responseCode = "204", description = "User deleted")
     public ResponseEntity<Void> deleteCurrentUser() {
         // Extract user ID from SecurityContext
-        String email = getCurrentEmail();
+        String email = SecurityUtil.getCurrentEmail();
 
         userService.deleteByEmail(email);
 
@@ -109,10 +110,4 @@ public class UserController {
 
     // ===================== HELPER =====================
 
-    private String getCurrentEmail() {
-        return org.springframework.security.core.context.SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-    }
 }
