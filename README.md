@@ -31,12 +31,13 @@
 
 
 # Ticket
-| Method | Endpoint                       | Description                  |
-|--------|--------------------------------|------------------------------|
-| POST   | /events/{eventID}/tickets      | Create ticket                |
-| GET    | /events/{eventID}/tickets/me   | Get current user's ticket    |
-| GET    | /tickets/{id}                  | Get ticket by id (organizer) |
-| DELETE | /events/{eventID}/tickets/{id} | Delete ticket                |
+| Method | Endpoint                       | Description                         |
+|--------|--------------------------------|-------------------------------------|
+| POST   | /events/{eventID}/tickets      | Create ticket                       |
+| GET    | /events/{eventID}/tickets/me   | Get current user's ticket           |
+| GET    | /tickets/{id}                  | Get ticket by id (organizer, admin) |
+| DELETE | /events/{eventID}/tickets/{id} | Delete ticket (organizer, admin)    |
+| DELETE | /events/{eventID}/tickets/me   | Delete my ticket                    |
 
 # Registration
 | Method | Endpoint                        | Description                                |
