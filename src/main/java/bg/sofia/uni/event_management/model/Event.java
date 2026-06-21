@@ -47,6 +47,11 @@ public class Event {
     )
     private Set<Category> categories = new HashSet<>();
 
+    @OneToMany(mappedBy = "event",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true)
+    private Set<Registration> registrations = new HashSet<>();
+
     public Event() {
     }
 
@@ -128,5 +133,13 @@ public class Event {
 
     public void setCategories(Set<Category> categories) {
         this.categories = categories;
+    }
+
+    public Set<Registration> getRegistrations() {
+        return registrations;
+    }
+
+    public void setRegistrations(Set<Registration> registrations) {
+        this.registrations = registrations;
     }
 }

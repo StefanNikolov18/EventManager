@@ -6,6 +6,7 @@ import bg.sofia.uni.event_management.service.RegistrationService;
 import bg.sofia.uni.event_management.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,7 +58,7 @@ public class RegistrationController {
         RegistrationResponse response =
             registrationService.create(currentUserId, eventId);
 
-        return ResponseEntity.status(201).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // ===================== UPDATE REGISTRATION =====================
