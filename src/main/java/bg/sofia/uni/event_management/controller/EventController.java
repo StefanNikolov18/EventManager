@@ -3,6 +3,7 @@ package bg.sofia.uni.event_management.controller;
 import bg.sofia.uni.event_management.dto.EventRequest;
 import bg.sofia.uni.event_management.dto.EventResponse;
 import bg.sofia.uni.event_management.dto.UserResponse;
+import bg.sofia.uni.event_management.security.SecurityUtil;
 import bg.sofia.uni.event_management.service.EventService;
 import bg.sofia.uni.event_management.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,8 +69,7 @@ public class EventController {
     public ResponseEntity<EventResponse> createEvent(
         @RequestBody @Valid EventRequest req
     ) {
-        String email = getCurrentEmail();
-        UserResponse user = userService.getByEmail(email);
+        UserResponse user = userService.getByEmail(SecurityUtil.getCurrentEmail());
         Long currentUserId = user.id();
 
         EventResponse created = eventService.createEvent(currentUserId, req);
@@ -88,8 +88,7 @@ public class EventController {
 
         @RequestBody @Valid EventRequest req
     ) {
-        String email = getCurrentEmail();
-        UserResponse user = userService.getByEmail(email);
+        UserResponse user = userService.getByEmail(SecurityUtil.getCurrentEmail());
         Long currentUserId = user.id();
         eventService.updateEvent(currentUserId, id, req);
 
@@ -104,21 +103,12 @@ public class EventController {
         @Parameter(description = "Event id")
         @PathVariable Long id
     ) {
-        String email = getCurrentEmail();
-        UserResponse user = userService.getByEmail(email);
+        UserResponse user = userService.getByEmail(SecurityUtil.getCurrentEmail());
         Long currentUserId = user.id();
         eventService.deleteEvent(currentUserId, id);
 
         return ResponseEntity.noContent().build();
     }
 
-    // ===================== HELPERS =====================
-
-    private String getCurrentEmail() {
-        return org.springframework.security.core.context.SecurityContextHolder
-            .getContext()
-            .getAuthentication()
-            .getName();
     }
-}
 

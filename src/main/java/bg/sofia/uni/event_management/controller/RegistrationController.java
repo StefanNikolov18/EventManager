@@ -2,6 +2,7 @@ package bg.sofia.uni.event_management.controller;
 
 import bg.sofia.uni.event_management.dto.RegistrationResponse;
 import bg.sofia.uni.event_management.dto.UserResponse;
+import bg.sofia.uni.event_management.security.SecurityUtil;
 import bg.sofia.uni.event_management.service.RegistrationService;
 import bg.sofia.uni.event_management.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +52,7 @@ public class RegistrationController {
     public ResponseEntity<RegistrationResponse> create(
         @PathVariable Long eventId
     ) {
-        String email = getCurrentEmail();
+        String email = SecurityUtil.getCurrentEmail();
         UserResponse user = userService.getByEmail(email);
         Long currentUserId = user.id();
 
@@ -86,10 +87,4 @@ public class RegistrationController {
 
     // ===================== HELPER =====================
 
-    private String getCurrentEmail() {
-        return org.springframework.security.core.context.SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-    }
 }
