@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset fmi:005-create-registrations-table
 CREATE TABLE registrations (
     id BIGSERIAL PRIMARY KEY,
     event_id BIGINT NOT NULL,

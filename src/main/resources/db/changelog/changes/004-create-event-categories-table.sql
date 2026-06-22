@@ -1,3 +1,6 @@
+--liquibase formatted sql
+
+--changeset fmi:004-create-event_categories-table
 CREATE TABLE event_categories (
     event_id BIGINT NOT NULL,
     category_id BIGINT NOT NULL,

@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset fmi:007-create-ticket-table
+--changeset fmi:006-create-ticket-table
 CREATE TABLE ticket (
 
     id BIGSERIAL PRIMARY KEY,

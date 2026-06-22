@@ -4,6 +4,7 @@ import bg.sofia.uni.event_management.model.enums.RegistrationStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "registrations",
@@ -34,15 +35,24 @@ public class Registration {
     @Column(name = "entry_code", nullable = false, unique = true, length = 50)
     private String entryCode;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Registration that = (Registration) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
     public Registration() {
     }
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Event getEvent() {
@@ -71,10 +81,6 @@ public class Registration {
 
     public LocalDateTime getRegistrationDate() {
         return registrationDate;
-    }
-
-    public void setRegistrationDate(LocalDateTime registrationDate) {
-        this.registrationDate = registrationDate;
     }
 
     public String getEntryCode() {
