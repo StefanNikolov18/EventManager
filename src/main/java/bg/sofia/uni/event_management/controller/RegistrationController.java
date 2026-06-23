@@ -1,5 +1,6 @@
 package bg.sofia.uni.event_management.controller;
 
+import bg.sofia.uni.event_management.dto.RegistrationRequest;
 import bg.sofia.uni.event_management.dto.RegistrationResponse;
 import bg.sofia.uni.event_management.dto.UserResponse;
 import bg.sofia.uni.event_management.security.SecurityUtil;
@@ -7,6 +8,7 @@ import bg.sofia.uni.event_management.service.RegistrationService;
 import bg.sofia.uni.event_management.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,7 @@ public class RegistrationController {
     @GetMapping("/events/{eventId}/registrations")
     @Operation(summary = "Get all registrations by event")
     @ApiResponse(responseCode = "200", description = "List of registrations")
+    @ApiResponse(responseCode = "404", description = "Event not found")
     public List<RegistrationResponse> getByEvent(@PathVariable Long eventId) {
         return registrationService.getByEventId(eventId);
     }
@@ -67,22 +70,26 @@ public class RegistrationController {
     @PutMapping("/registrations/{id}")
     @Operation(summary = "Update registration status")
     public ResponseEntity<RegistrationResponse> update(
-        @PathVariable Long id
+        @PathVariable Long id,
+        @RequestBody  @Valid RegistrationRequest request
     ) {
+        String email = SecurityUtil.getCurrentEmail();
+        UserResponse user = userService.getByEmail(email);
+
         RegistrationResponse response =
-            registrationService.update(id);
+            registrationService.update(user.id(), id, request);
 
         return ResponseEntity.ok(response);
     }
 
     // ===================== DELETE REGISTRATION =====================
 
-    @DeleteMapping("/registrations/{id}")
-    @Operation(summary = "Delete registration")
-    @ApiResponse(responseCode = "204", description = "Deleted")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        registrationService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
+//    @DeleteMapping("/registrations/{id}")
+//    @Operation(summary = "Delete registration")
+//    @ApiResponse(responseCode = "204", description = "Deleted")
+//    public ResponseEntity<Void> delete(@PathVariable Long id) {
+//        registrationService.delete(id);
+//        return ResponseEntity.noContent().build();
+//    }
 
 }

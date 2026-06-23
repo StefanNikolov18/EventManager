@@ -1,4 +1,11 @@
 package bg.sofia.uni.event_management.dto;
 
-public record RegistrationRequest() {
+import jakarta.validation.constraints.NotNull;
+import bg.sofia.uni.event_management.model.enums.RegistrationStatus;
+
+public record RegistrationRequest(
+
+    @NotNull(message = "Status is required")
+    RegistrationStatus status
+) {
 }

@@ -1,6 +1,8 @@
 package bg.sofia.uni.event_management.service;
 
+import bg.sofia.uni.event_management.dto.RegistrationRequest;
 import bg.sofia.uni.event_management.dto.RegistrationResponse;
+import bg.sofia.uni.event_management.exceptions.AccessDeniedException;
 import bg.sofia.uni.event_management.exceptions.NotFoundException;
 import bg.sofia.uni.event_management.model.Event;
 import bg.sofia.uni.event_management.model.Registration;
@@ -35,6 +37,10 @@ public class RegistrationService {
     // ===================== GET BY EVENT =====================
 
     public List<RegistrationResponse> getByEventId(Long eventId) {
+        eventRepository.findById(eventId)
+            .orElseThrow(() ->
+                new NotFoundException("Event not found with id: " + eventId));
+
         return registrationRepository.findByEventId(eventId)
             .stream()
             .map(RegistrationResponse::from)
@@ -87,7 +93,7 @@ public class RegistrationService {
         Registration registration = new Registration();
         registration.setUser(user);
         registration.setEvent(event);
-        registration.setStatus(RegistrationStatus.CONFIRMED);
+        registration.setStatus(RegistrationStatus.PENDING);
 
         // 7. generate entry code
         registration.setEntryCode(UUID.randomUUID().toString());
@@ -100,35 +106,49 @@ public class RegistrationService {
     // ===================== UPDATE =====================
 
     @Transactional
-    public RegistrationResponse update(Long id) {
+    public RegistrationResponse update(Long currentUserId, Long id, RegistrationRequest request) {
 
         Registration reg = registrationRepository.findById(id)
             .orElseThrow(() ->
                 new NotFoundException("Registration not found with id: " + id));
 
-        // toggle status
-        if (reg.getStatus() == RegistrationStatus.CONFIRMED) {
-            reg.setStatus(RegistrationStatus.CANCELLED);
-        } else {
-            reg.setStatus(RegistrationStatus.CONFIRMED);
+        Event event = reg.getEvent();
+
+        // 1. само организатор може да управлява регистрациите
+        if (!event.getOrganizer().getId().equals(currentUserId)) {
+            throw new AccessDeniedException("Not allowed");
         }
+
+        // 2. ако няма промяна → нищо не правим
+        if (reg.getStatus() == request.status()) {
+            return RegistrationResponse.from(reg);
+        }
+
+        // 3. ако става CANCELLED → върни билет
+        if (request.status() == RegistrationStatus.CANCELLED
+            && reg.getStatus() != RegistrationStatus.CANCELLED) {
+
+            event.setAvailableTickets(event.getAvailableTickets() + 1);
+        }
+
+        reg.setStatus(request.status());
 
         return RegistrationResponse.from(reg);
     }
 
     // ===================== DELETE =====================
 
-    @Transactional
-    public void delete(Long id) {
-
-        Registration reg = registrationRepository.findById(id)
-            .orElseThrow(() ->
-                new NotFoundException("Registration not found with id: " + id));
-
-        // give ticket back
-        Event event = reg.getEvent();
-        event.setAvailableTickets(event.getAvailableTickets() + 1);
-
-        registrationRepository.delete(reg);
-    }
+//    @Transactional
+//    public void delete(Long id) {
+//
+//        Registration reg = registrationRepository.findById(id)
+//            .orElseThrow(() ->
+//                new NotFoundException("Registration not found with id: " + id));
+//
+//        // give ticket back
+//        Event event = reg.getEvent();
+//        event.setAvailableTickets(event.getAvailableTickets() + 1);
+//
+//        registrationRepository.delete(reg);
+//    }
 }

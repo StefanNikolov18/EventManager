@@ -11,12 +11,6 @@ import java.util.List;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    List<Event> findByOrganizerId(Long organizerId);
-
-    List<Event> findByTitleContainingIgnoreCase(String title);
-
-    List<Event> findByVenueContainingIgnoreCase(String venue);
-
     @Query(value = """
         SELECT DISTINCT e.* FROM events e
         LEFT JOIN event_categories ec ON e.id = ec.event_id

@@ -10,10 +10,8 @@ import java.util.Optional;
 @Repository
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
 
-    // всички регистрации за дадено събитие
     List<Registration> findByEventId(Long eventId);
 
-    // всички регистрации на даден user
     List<Registration> findByUserId(Long userId);
 
     // проверка дали user вече е записан за event
