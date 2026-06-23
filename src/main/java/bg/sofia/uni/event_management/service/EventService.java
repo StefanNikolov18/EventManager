@@ -81,6 +81,9 @@ public class EventService {
             Set<Category> categories = new HashSet<>(
                 categoryRepository.findAllById(request.categoryIds())
             );
+            if (categories.size() != request.categoryIds().size()) {
+                throw new NotFoundException("Some categories do not exist");
+            }
             event.setCategories(categories);
         }
 
@@ -104,14 +107,12 @@ public class EventService {
         event.setVenue(request.venue());
         event.setStartTime(request.startTime());
         event.setEndTime(request.endTime());
-        event.setCapacity(request.capacity());
-
-        // Optional: adjust available tickets if needed
-        if (event.getAvailableTickets() > request.capacity()) {
-            event.setAvailableTickets(request.capacity());
+        Integer bookedTickets = event.getCapacity() - event.getAvailableTickets();
+        if (bookedTickets > request.capacity()) {
+            throw new IllegalArgumentException("Capacity too low");
         }
-        // не нужно заради Transactional
-        // eventRepository.save(event);
+        event.setCapacity(request.capacity());
+        event.setAvailableTickets(request.capacity() - bookedTickets);
     }
 
     public void deleteEvent(Long currentUserId, Long eventId) {

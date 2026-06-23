@@ -81,6 +81,7 @@ public class RegistrationService {
 
         // 5. reduce capacity
         event.setAvailableTickets(event.getAvailableTickets() - 1);
+        // eventRepository.save(event);
 
         // 6. create registration
         Registration registration = new Registration();

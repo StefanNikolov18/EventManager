@@ -64,6 +64,7 @@ public class EventController {
 
     @PostMapping
     @Operation(summary = "Create event")
+    @ApiResponse(responseCode = "404", description = "User not found")
     @ApiResponse(responseCode = "201", description = "Event created")
     @ApiResponse(responseCode = "400", description = "Invalid event data")
     public ResponseEntity<EventResponse> createEvent(
@@ -110,5 +111,5 @@ public class EventController {
         return ResponseEntity.noContent().build();
     }
 
-    }
+}
 
