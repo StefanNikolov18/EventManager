@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,6 +48,16 @@ public class EventController {
     ) {
 
         return eventService.getEvents(title, venue, organizerId, categoryId);
+    }
+
+    @GetMapping("/page")
+    @Operation(summary = "Get paginated events with optional category filter")
+    public Page<EventResponse> getEventsPaginated(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) Long categoryId
+    ) {
+        return eventService.getEventsPaginated(page, size, categoryId);
     }
 
     @GetMapping("/{id}")
@@ -112,4 +123,3 @@ public class EventController {
     }
 
 }
-

@@ -11,6 +11,10 @@ import bg.sofia.uni.event_management.model.enums.Role;
 import bg.sofia.uni.event_management.repository.CategoryRepository;
 import bg.sofia.uni.event_management.repository.EventRepository;
 import bg.sofia.uni.event_management.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
@@ -49,6 +53,12 @@ public class EventService {
             .stream()
             .map(EventResponse::from)
             .toList();
+    }
+
+    public Page<EventResponse> getEventsPaginated(int page, int size, Long categoryId) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("start_time").descending());
+        return eventRepository.findPaginated(categoryId, pageable)
+            .map(EventResponse::from);
     }
 
     public EventResponse getEventById(Long id) {
