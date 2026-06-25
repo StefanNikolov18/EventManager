@@ -32,7 +32,16 @@ build/
 ### VS Code ###
 .vscode/
 
+### Node / Angular ###
+node_modules/
+frontend/dist/
+frontend/.angular/
+
+### Angular env files ###
+frontend/src/environments/environment.prod.ts
+
 ### ENV ###
 backend/.env
+.env
 
 /angular_helper/

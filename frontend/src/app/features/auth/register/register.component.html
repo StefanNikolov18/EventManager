@@ -1,0 +1,57 @@
+<div class="auth-container">
+  <form [formGroup]="form" (ngSubmit)="onRegister()">
+    <h2>Create Account</h2>
+
+    <div class="field">
+      <label for="firstName">First Name</label>
+      <input id="firstName" formControlName="firstName" />
+      @if (form.get('firstName')?.invalid && form.get('firstName')?.touched) {
+        <span class="error">First name is required</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="lastName">Last Name</label>
+      <input id="lastName" formControlName="lastName" />
+      @if (form.get('lastName')?.invalid && form.get('lastName')?.touched) {
+        <span class="error">Last name is required</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" formControlName="email" type="email" autocomplete="email" />
+      @if (form.get('email')?.invalid && form.get('email')?.touched) {
+        <span class="error">Valid email required</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" formControlName="password" type="password" autocomplete="new-password" />
+      @if (form.get('password')?.errors?.['minlength']) {
+        <span class="error">Password must be at least 6 characters</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="confirmPassword">Confirm Password</label>
+      <input id="confirmPassword" formControlName="confirmPassword" type="password" />
+      @if (form.errors?.['mismatch'] && form.get('confirmPassword')?.touched) {
+        <span class="error">Passwords do not match</span>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error-banner">{{ errorMessage() }}</p>
+    }
+
+    <button type="submit" [disabled]="form.invalid || loading()">
+      {{ loading() ? 'Creating account...' : 'Register' }}
+    </button>
+
+    <p class="auth-link">
+      Already have an account? <a routerLink="/login">Login here</a>
+    </p>
+  </form>
+</div>
