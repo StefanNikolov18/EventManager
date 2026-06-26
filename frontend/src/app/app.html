@@ -1,5 +1,23 @@
 <header>
-  <span class="logo">EventManager</span>
+  <a class="logo" routerLink="/events">EventManager</a>
+
+  <nav class="nav-links">
+    <a routerLink="/events" routerLinkActive="active">Events</a>
+  </nav>
+
+  <div class="nav-right">
+    @if (authService.isLoggedIn()) {
+      <span class="user-greeting">
+        {{ authService.currentUser()?.firstName || 'User' }}
+        @if (authService.isAdmin()) {
+          <span class="admin-badge">ADMIN</span>
+        }
+      </span>
+      <button class="logout-btn" (click)="authService.logout()">Logout</button>
+    } @else {
+      <a routerLink="/login" class="login-btn">Login</a>
+    }
+  </div>
 </header>
 
 <router-outlet></router-outlet>

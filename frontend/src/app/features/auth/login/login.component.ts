@@ -33,7 +33,8 @@ export class LoginComponent {
 
     this.authService.login({ email, password }).subscribe({
       next: () => {
-        this.router.navigate(['/']);
+        this.authService.fetchCurrentUser();
+        this.router.navigate(['/events']);
       },
       error: (err) => {
         this.errorMessage.set(err.error?.message || 'Invalid email or password');

@@ -10,6 +10,7 @@ import bg.sofia.uni.event_management.repository.UserRepository;
 import bg.sofia.uni.event_management.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,14 +45,19 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.password()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.email(),
+                            request.password()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            throw new NotFoundException("Invalid email or password!");
+        }
+
         var user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new NotFoundException("Invalid email or password"));
+                .orElseThrow(() -> new NotFoundException("Invalid email or password!"));
 
         var userDetails = org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())

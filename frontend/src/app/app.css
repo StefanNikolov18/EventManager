@@ -1,12 +1,95 @@
 header {
   background: linear-gradient(135deg, #1565c0, #1976d2);
-  padding: 16px 32px;
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .logo {
   color: white;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.5px;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-links a {
+  color: rgba(255,255,255,.8);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: white;
+  border-bottom-color: white;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-greeting {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.admin-badge {
+  background: #ffc107;
+  color: #1a1a2e;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.logout-btn,
+.login-btn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .2s;
+}
+
+.logout-btn {
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3);
+  color: white;
+}
+
+.logout-btn:hover {
+  background: rgba(255,255,255,.25);
+}
+
+.login-btn {
+  background: white;
+  color: #1565c0;
+  border: none;
+}
+
+.login-btn:hover {
+  background: #e3f2fd;
 }

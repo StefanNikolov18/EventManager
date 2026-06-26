@@ -1,5 +1,6 @@
 package bg.sofia.uni.event_management.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -17,6 +18,7 @@ public class Category {
     @Column(name = "category_name", nullable = false, unique = true, length = 255)
     private String categoryName;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "categories")
     private Set<Event> events = new HashSet<>();
 
