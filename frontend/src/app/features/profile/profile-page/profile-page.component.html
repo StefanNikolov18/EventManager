@@ -1,0 +1,66 @@
+<div class="profile-container">
+  <!-- User Info Card -->
+  <div class="profile-card">
+    <div class="avatar">
+      {{ currentUser()?.firstName?.charAt(0) }}{{ currentUser()?.lastName?.charAt(0) }}
+    </div>
+    <div class="user-details">
+      <h1>{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</h1>
+      <p class="email">{{ currentUser()?.email }}</p>
+      <span class="role-badge" [class.admin]="currentUser()?.role === 'ADMIN'">
+        {{ currentUser()?.role }}
+      </span>
+    </div>
+  </div>
+
+  <!-- My Events Section -->
+  <div class="events-section">
+    <h2>My Events</h2>
+
+    @if (loading) {
+      <p class="loading-text">Loading your events...</p>
+    } @else if (error) {
+      <p class="error-text">{{ error }}</p>
+    } @else if (myEvents.length === 0) {
+      <div class="empty-state">
+        <p>You haven't created any events yet.</p>
+        <a routerLink="/events" class="create-link">Browse Events</a>
+      </div>
+    } @else {
+      <div class="events-table-wrapper">
+        <table class="events-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Venue</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Capacity</th>
+              <th>Categories</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (event of myEvents; track event.id) {
+              <tr>
+                <td class="td-title">{{ event.title }}</td>
+                <td>{{ event.venue }}</td>
+                <td>{{ event.startTime | date:'medium' }}</td>
+                <td>{{ event.endTime | date:'medium' }}</td>
+                <td>{{ event.capacity }}</td>
+                <td>
+                  @if (event.categories.length > 0) {
+                    <span class="category-tag" [style.background]="'#e3f2fd'" [style.color]="'#1565c0'">
+                      {{ event.categories.join(', ') }}
+                    </span>
+                  } @else {
+                    <span class="no-categories">—</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

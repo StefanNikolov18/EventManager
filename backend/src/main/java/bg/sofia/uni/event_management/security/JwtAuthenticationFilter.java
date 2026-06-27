@@ -28,29 +28,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                   @NonNull FilterChain filterChain)
             throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
-        userEmail = jwtUtils.extractUsername(jwt);
+        try {
+            final String jwt = authHeader.substring(7);
+            final String userEmail = jwtUtils.extractUsername(jwt);
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-            if (jwtUtils.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-                );
+                if (jwtUtils.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                    );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            // Invalid token or missing user — do not block public endpoints.
+            // Just continue without authentication.
         }
 
         filterChain.doFilter(request, response);

@@ -1,6 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { EventService } from '../../../core/services/event.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService, UserResponse } from '../../../core/services/user.service';
@@ -13,10 +14,12 @@ import { EventResponse, EventRequest, Category } from '../../../core/models/even
   templateUrl: './events-page.component.html',
   styleUrl: './events-page.component.css'
 })
-export class EventsPageComponent implements OnInit {
+export class EventsPageComponent implements OnInit, OnDestroy {
   private eventService = inject(EventService);
   private userService = inject(UserService);
   authService = inject(AuthService);
+
+  private eventsSub?: Subscription;
 
   // ── filters ──
   filterTitle = '';
@@ -30,7 +33,8 @@ export class EventsPageComponent implements OnInit {
   totalPages = signal(0);
   totalElements = signal(0);
   pageSize = 10;
-  loading = signal(false);
+  loading = signal(true);
+  errorMessage = signal('');
 
   // ── create / edit modal ──
   showModal = signal(false);
@@ -52,6 +56,10 @@ export class EventsPageComponent implements OnInit {
     this.authService.fetchCurrentUser();
   }
 
+  ngOnDestroy() {
+    this.eventsSub?.unsubscribe();
+  }
+
   loadCategories() {
     this.eventService.getCategories().subscribe({
       next: c => this.categories.set(c)
@@ -60,7 +68,9 @@ export class EventsPageComponent implements OnInit {
 
   loadEvents() {
     this.loading.set(true);
-    this.eventService.getEventsPage(
+    this.errorMessage.set('');
+    this.eventsSub?.unsubscribe();
+    this.eventsSub = this.eventService.getEventsPage(
       this.currentPage(),
       this.pageSize,
       this.selectedCategoryId ?? undefined
@@ -72,7 +82,11 @@ export class EventsPageComponent implements OnInit {
         this.currentPage.set(page.number);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: (err) => {
+        console.error('Failed to load events page:', err);
+        this.errorMessage.set('Failed to load events.');
+        this.loading.set(false);
+      }
     });
   }
 
@@ -83,7 +97,8 @@ export class EventsPageComponent implements OnInit {
       return;
     }
     this.loading.set(true);
-    this.eventService.getEvents(
+    this.eventsSub?.unsubscribe();
+    this.eventsSub = this.eventService.getEvents(
       this.filterTitle || undefined,
       this.filterVenue || undefined,
       this.selectedCategoryId ?? undefined
@@ -95,7 +110,10 @@ export class EventsPageComponent implements OnInit {
         this.currentPage.set(0);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: (err) => {
+        console.error('Search failed:', err);
+        this.loading.set(false);
+      }
     });
   }
 
