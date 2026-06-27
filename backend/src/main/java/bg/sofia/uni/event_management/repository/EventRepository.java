@@ -14,8 +14,8 @@ import java.util.List;
 public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query(value = """
-        SELECT DISTINCT e.* FROM events e
-        LEFT JOIN event_categories ec ON e.id = ec.event_id
+        SELECT DISTINCT e.* FROM events.events e
+        LEFT JOIN events.event_categories ec ON e.id = ec.event_id
         WHERE (:title IS NULL OR e.title ILIKE CONCAT('%', CAST(:title AS text), '%'))
           AND (:venue IS NULL OR e.venue ILIKE CAST(:venue AS text))
           AND (:organizerId IS NULL OR e.organizer_id = :organizerId)
@@ -29,14 +29,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     );
 
     @Query(value = """
-        SELECT DISTINCT e.* FROM events e
-        LEFT JOIN event_categories ec ON e.id = ec.event_id
+        SELECT DISTINCT e.* FROM events.events e
+        LEFT JOIN events.event_categories ec ON e.id = ec.event_id
         WHERE (:categoryId IS NULL OR ec.category_id = :categoryId)
-        ORDER BY e.start_time DESC
         """,
         countQuery = """
-        SELECT COUNT(DISTINCT e.id) FROM events e
-        LEFT JOIN event_categories ec ON e.id = ec.event_id
+        SELECT COUNT(DISTINCT e.id) FROM events.events e
+        LEFT JOIN events.event_categories ec ON e.id = ec.event_id
         WHERE (:categoryId IS NULL OR ec.category_id = :categoryId)
         """,
         nativeQuery = true)

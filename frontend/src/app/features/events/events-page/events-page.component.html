@@ -34,6 +34,8 @@
   <!-- ── events table ── -->
   @if (loading()) {
     <p class="loading">Loading events…</p>
+  } @else if (errorMessage()) {
+    <p class="error-text">{{ errorMessage() }}</p>
   } @else if (events().length === 0) {
     <p class="empty">No events found.</p>
   } @else {

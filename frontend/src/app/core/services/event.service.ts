@@ -20,11 +20,12 @@ export class EventService {
     return this.http.get<PageResponse<EventResponse>>(`${this.apiUrl}/events/page`, { params });
   }
 
-  getEvents(title?: string, venue?: string, categoryId?: number): Observable<EventResponse[]> {
+  getEvents(title?: string, venue?: string, categoryId?: number, organizerId?: number): Observable<EventResponse[]> {
     let params = new HttpParams();
     if (title) params = params.set('title', title);
     if (venue) params = params.set('venue', venue);
     if (categoryId != null) params = params.set('categoryId', categoryId.toString());
+    if (organizerId != null) params = params.set('organizerId', organizerId.toString());
 
     return this.http.get<EventResponse[]>(`${this.apiUrl}/events`, { params });
   }

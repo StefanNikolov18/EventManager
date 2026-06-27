@@ -13,6 +13,7 @@
           <span class="admin-badge">ADMIN</span>
         }
       </span>
+      <a routerLink="/profile" class="profile-btn">My Profile</a>
       <button class="logout-btn" (click)="authService.logout()">Logout</button>
     } @else {
       <a routerLink="/login" class="login-btn">Login</a>

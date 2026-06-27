@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name="events")
+@Table(name = "events", schema = "events")
 public class Event {
 
     @Id
@@ -43,6 +43,7 @@ public class Event {
     @ManyToMany
     @JoinTable(
         name = "event_categories",
+        schema = "events",
         joinColumns = @JoinColumn(name = "event_id"),
         inverseJoinColumns = @JoinColumn(name = "category_id")
     )
