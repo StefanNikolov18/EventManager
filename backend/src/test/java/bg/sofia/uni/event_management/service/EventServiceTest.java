@@ -82,23 +82,6 @@ public class EventServiceTest {
         );
     }
 
-    // ===================== getAllEvents =====================
-
-    @Test
-    void testGetAllEventsReturnsCorrectSize() {
-        when(eventRepository.findAll()).thenReturn(List.of(event));
-
-        List<EventResponse> result = eventService.getAllEvents();
-
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    void testGetAllEventsReturnsEmptyList() {
-        when(eventRepository.findAll()).thenReturn(List.of());
-
-        assertTrue(eventService.getAllEvents().isEmpty());
-    }
 
     // ===================== getEventById =====================
 

@@ -4,6 +4,7 @@ import bg.sofia.uni.event_management.exceptions.AccessDeniedException;
 import bg.sofia.uni.event_management.exceptions.NotFoundException;
 import bg.sofia.uni.event_management.web.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -69,5 +70,19 @@ public class GlobalExceptionHandler {
                         "Invalid email or password",
                         req.getRequestURI()
                 ));
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleOptimisticLock(
+        OptimisticLockingFailureException ex,
+        HttpServletRequest req) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(new ErrorResponse(
+                LocalDateTime.now(),
+                409,
+                "The resource was modified by another request. Please retry.",
+                req.getRequestURI()
+            ));
     }
 }

@@ -3,7 +3,9 @@ package bg.sofia.uni.event_management.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -39,6 +41,12 @@ public class Event {
 
     @Column(name = "available_tickets", nullable = false)
     private Integer availableTickets;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Session> sessions = new ArrayList<>();
+
+    @Version
+    private Long version;
 
     @ManyToMany
     @JoinTable(
@@ -84,6 +92,10 @@ public class Event {
 
     public String getTitle() {
         return title;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public void setTitle(String title) {
@@ -136,6 +148,14 @@ public class Event {
 
     public void setAvailableTickets(Integer availableTickets) {
         this.availableTickets = availableTickets;
+    }
+
+    public List<Session> getSessions() {
+        return sessions;
+    }
+
+    public void setSessions(List<Session> sessions) {
+        this.sessions = sessions;
     }
 
     public Set<Category> getCategories() {

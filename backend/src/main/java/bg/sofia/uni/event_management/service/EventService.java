@@ -36,13 +36,6 @@ public class EventService {
         this.categoryRepository = categoryRepository;
     }
 
-    public List<EventResponse> getAllEvents() {
-        return eventRepository.findAll()
-            .stream()
-            .map(EventResponse::from)
-            .toList();
-    }
-
     public List<EventResponse> getEvents(
         String title,
         String venue,
@@ -88,13 +81,7 @@ public class EventService {
 
         // resolve categories from IDs
         if (request.categoryIds() != null && !request.categoryIds().isEmpty()) {
-            Set<Category> categories = new HashSet<>(
-                categoryRepository.findAllById(request.categoryIds())
-            );
-            if (categories.size() != request.categoryIds().size()) {
-                throw new NotFoundException("Some categories do not exist");
-            }
-            event.setCategories(categories);
+            event.setCategories(resolveCategories(request.categoryIds()));
         }
 
         Event saved = eventRepository.save(event);
@@ -123,6 +110,9 @@ public class EventService {
         }
         event.setCapacity(request.capacity());
         event.setAvailableTickets(request.capacity() - bookedTickets);
+        if (request.categoryIds() != null) {
+            event.setCategories(resolveCategories(request.categoryIds()));
+        }
     }
 
     public void deleteEvent(Long currentUserId, Long eventId) {
@@ -141,5 +131,18 @@ public class EventService {
         }
 
         eventRepository.delete(event);
+    }
+
+    private Set<Category> resolveCategories(Set<Long> categoryIds) {
+
+        Set<Category> categories = new HashSet<>(
+            categoryRepository.findAllById(categoryIds)
+        );
+
+        if (categories.size() != categoryIds.size()) {
+            throw new NotFoundException("Some categories do not exist");
+        }
+
+        return categories;
     }
 }
