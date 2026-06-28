@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SessionService } from '../../../core/services/session.service';
 import { SpeakerService } from '../../../core/services/speaker.service';
+import { PresentationMaterialService } from '../../../core/services/presentation-material.service';
 import { EventService } from '../../../core/services/event.service';
 import { AuthService } from '../../../core/services/auth.service';
 import {
@@ -35,6 +36,7 @@ export class SessionsPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private sessionService = inject(SessionService);
   private speakerService = inject(SpeakerService);
+  private materialService = inject(PresentationMaterialService);
   private eventService = inject(EventService);
   authService = inject(AuthService);
 
@@ -204,14 +206,52 @@ export class SessionsPageComponent implements OnInit {
         next: savedSession => {
           // Save speakers after session is created
           const validSpeakers = this.formSpeakers.filter(s => s.name.trim());
-          if (validSpeakers.length === 0) {
+          const hasMaterial = this.formMaterialUrl.trim().length > 0;
+
+          if (validSpeakers.length === 0 && !hasMaterial) {
             this.closeModal();
             this.saving.set(false);
             this.loadSessions();
             return;
           }
 
+          const speakerIds: number[] = [];
           let completed = 0;
+          const total = validSpeakers.length;
+
+          const finish = () => {
+            // If material URL is set, save it for the first speaker
+            if (hasMaterial && speakerIds.length > 0) {
+              this.materialService.createMaterial(speakerIds[0], {
+                speakerId: speakerIds[0],
+                sessionId: savedSession.id,
+                fileUrl: this.formMaterialUrl,
+                fileType: this.formMaterialType
+              }).subscribe({
+                next: () => {
+                  this.closeModal();
+                  this.saving.set(false);
+                  this.loadSessions();
+                },
+                error: (err) => {
+                  console.error('Failed to save material', err);
+                  this.closeModal();
+                  this.saving.set(false);
+                  this.loadSessions();
+                }
+              });
+            } else {
+              this.closeModal();
+              this.saving.set(false);
+              this.loadSessions();
+            }
+          };
+
+          if (total === 0) {
+            finish();
+            return;
+          }
+
           validSpeakers.forEach(speaker => {
             const req: SpeakerRequest = {
               name: speaker.name,
@@ -221,22 +261,15 @@ export class SessionsPageComponent implements OnInit {
               websiteUrl: speaker.websiteUrl
             };
             this.speakerService.createSpeaker(savedSession.id, req).subscribe({
-              next: () => {
+              next: (createdSpeaker) => {
+                speakerIds.push(createdSpeaker.id);
                 completed++;
-                if (completed === validSpeakers.length) {
-                  this.closeModal();
-                  this.saving.set(false);
-                  this.loadSessions();
-                }
+                if (completed === total) finish();
               },
               error: (err) => {
                 console.error('Failed to create speaker', err);
                 completed++;
-                if (completed === validSpeakers.length) {
-                  this.closeModal();
-                  this.saving.set(false);
-                  this.loadSessions();
-                }
+                if (completed === total) finish();
               }
             });
           });

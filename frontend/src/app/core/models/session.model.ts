@@ -51,6 +51,7 @@ export interface PresentationMaterialResponse {
 
 export interface PresentationMaterialRequest {
   speakerId: number;
+  sessionId: number;
   fileUrl: string;
   fileType: string;
 }
