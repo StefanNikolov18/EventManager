@@ -6,6 +6,7 @@ import bg.sofia.uni.event_management.exceptions.AccessDeniedException;
 import bg.sofia.uni.event_management.exceptions.NotFoundException;
 import bg.sofia.uni.event_management.model.Event;
 import bg.sofia.uni.event_management.model.User;
+import bg.sofia.uni.event_management.model.enums.Currency;
 import bg.sofia.uni.event_management.model.enums.Role;
 import bg.sofia.uni.event_management.repository.CategoryRepository;
 import bg.sofia.uni.event_management.repository.EventRepository;
@@ -17,17 +18,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EventServiceTest {
@@ -66,6 +64,8 @@ public class EventServiceTest {
         event.setVenue("Sofia");
         event.setCapacity(100);
         event.setAvailableTickets(100);
+        event.setTicketPrice(BigDecimal.valueOf(10));
+        event.setCurrency(Currency.EUR);
         event.setOrganizer(organizer);
     }
 
@@ -78,10 +78,11 @@ public class EventServiceTest {
             LocalDateTime.now().plusHours(2),
             100,
             100,
+            BigDecimal.valueOf(10),
+            Currency.EUR,
             Set.of()
         );
     }
-
 
     // ===================== getEventById =====================
 
