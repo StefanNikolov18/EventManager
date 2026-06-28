@@ -44,10 +44,13 @@ public class TicketService {
             throw new IllegalArgumentException("Ticket already exists for this registration.");
         }
 
+        Event event = registration.getEvent();
+
         Ticket ticket = new Ticket();
         ticket.setRegistration(registration);
-        ticket.setPrice(BigDecimal.ZERO);
-        ticket.setCurrency(Currency.BGN);
+
+        ticket.setPrice(event.getTicketPrice());
+        ticket.setCurrency(event.getCurrency());
 
         Ticket saved = ticketRepository.save(ticket);
 

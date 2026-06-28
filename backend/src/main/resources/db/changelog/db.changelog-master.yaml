@@ -23,3 +23,5 @@ databaseChangeLog:
       file: db/changelog/changes/011-fix-speakers-table.sql
   - include:
       file: db/changelog/changes/012-create-presentation-materials-table.sql
+  - include:
+      file: db/changelog/changes/013-add-ticket-price-and-currency-to-events.sql

@@ -1,7 +1,9 @@
 package bg.sofia.uni.event_management.model;
 
+import bg.sofia.uni.event_management.model.enums.Currency;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -44,6 +46,13 @@ public class Event {
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Session> sessions = new ArrayList<>();
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal ticketPrice;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private Currency currency;
 
     @Version
     private Long version;
@@ -173,5 +182,21 @@ public class Event {
 
     public void setRegistrations(Set<Registration> registrations) {
         this.registrations = registrations;
+    }
+
+    public BigDecimal getTicketPrice() {
+        return ticketPrice;
+    }
+
+    public void setTicketPrice(BigDecimal ticketPrice) {
+        this.ticketPrice = ticketPrice;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 }

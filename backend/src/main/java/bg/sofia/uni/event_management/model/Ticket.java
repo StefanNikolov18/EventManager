@@ -17,11 +17,11 @@ public class Ticket {
     @JoinColumn(name = "registration_id", nullable = false)
     private Registration registration;
 
-    @Column(name = "price", nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "currency", nullable = false, length = 10)
+    @Column(length = 10)
     private Currency currency;
 
     public Ticket() {

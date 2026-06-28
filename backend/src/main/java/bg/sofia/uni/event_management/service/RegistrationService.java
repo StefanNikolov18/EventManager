@@ -3,6 +3,7 @@ package bg.sofia.uni.event_management.service;
 import bg.sofia.uni.event_management.dto.RegistrationRequest;
 import bg.sofia.uni.event_management.dto.RegistrationResponse;
 import bg.sofia.uni.event_management.exceptions.AccessDeniedException;
+import bg.sofia.uni.event_management.exceptions.BadRequestException;
 import bg.sofia.uni.event_management.exceptions.NotFoundException;
 import bg.sofia.uni.event_management.model.Event;
 import bg.sofia.uni.event_management.model.Registration;
@@ -77,12 +78,12 @@ public class RegistrationService {
             .existsByUserIdAndEventId(userId, eventId);
 
         if (exists) {
-            throw new IllegalArgumentException("User already registered for this event.");
+            throw new BadRequestException("User already registered for this event.");
         }
 
         // 4. capacity check
         if (event.getAvailableTickets() <= 0) {
-            throw new IllegalArgumentException("No available tickets for this event.");
+            throw new BadRequestException("No available tickets for this event.");
         }
 
         // 5. reduce capacity
