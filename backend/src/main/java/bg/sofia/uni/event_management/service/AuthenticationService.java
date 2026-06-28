@@ -25,6 +25,11 @@ public class AuthenticationService {
     private final JwtUtils jwtUtils;
 
     public AuthenticationResponse register(RegisterRequest request) {
+        //check if current user is already in db
+        if (userRepository.existsByEmail(request.email())) {
+            throw new IllegalArgumentException("User with this email already exists");
+        }
+
         var user = User.builder()
                 .email(request.email())
                 .firstName(request.firstName())
