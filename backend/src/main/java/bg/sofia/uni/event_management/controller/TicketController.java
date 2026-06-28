@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class TicketController {
 
@@ -19,6 +21,17 @@ public class TicketController {
     public TicketController(TicketService ticketService, UserService userService) {
         this.ticketService = ticketService;
         this.userService = userService;
+    }
+
+    // ===================== MY TICKETS =====================
+
+    @GetMapping("/tickets/me")
+    @Operation(summary = "Get current user's tickets")
+    @ApiResponse(responseCode = "200", description = "List of tickets")
+    public List<TicketResponse> getMyTickets() {
+        UserResponse user = userService.getByEmail(SecurityUtil.getCurrentEmail());
+        Long currentUserId = user.id();
+        return ticketService.getTicketsByUserId(currentUserId);
     }
 
     // ===================== PUBLIC ENDPOINTS =====================

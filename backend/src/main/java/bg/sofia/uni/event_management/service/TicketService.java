@@ -16,6 +16,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class TicketService {
@@ -50,7 +51,8 @@ public class TicketService {
         ticket.setRegistration(registration);
 
         ticket.setPrice(event.getTicketPrice());
-        ticket.setCurrency(event.getCurrency());
+        // free events may have null currency → default to EUR for the ticket
+        ticket.setCurrency(event.getCurrency() != null ? event.getCurrency() : Currency.EUR);
 
         Ticket saved = ticketRepository.save(ticket);
 
@@ -67,6 +69,13 @@ public class TicketService {
                 .orElseThrow(() -> new NotFoundException("Ticket does not exist for this event " + eventId));
 
         return TicketResponse.from(ticket);
+    }
+
+    public List<TicketResponse> getTicketsByUserId(Long userId) {
+        return ticketRepository.findByUserId(userId)
+            .stream()
+            .map(TicketResponse::from)
+            .toList();
     }
 
     public TicketResponse getTicketById(Long ticketId, Long currentUserId) {

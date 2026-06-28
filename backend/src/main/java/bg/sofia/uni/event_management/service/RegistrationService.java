@@ -35,6 +35,15 @@ public class RegistrationService {
         this.userRepository = userRepository;
     }
 
+    // ===================== GET BY USER =====================
+
+    public List<RegistrationResponse> getByUserId(Long userId) {
+        return registrationRepository.findByUserId(userId)
+            .stream()
+            .map(RegistrationResponse::from)
+            .toList();
+    }
+
     // ===================== GET BY EVENT =====================
 
     public List<RegistrationResponse> getByEventId(Long eventId) {

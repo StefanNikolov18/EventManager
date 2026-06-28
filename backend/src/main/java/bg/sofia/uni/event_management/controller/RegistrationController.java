@@ -27,6 +27,17 @@ public class RegistrationController {
         this.userService = userService;
     }
 
+    // ===================== MY REGISTRATIONS =====================
+
+    @GetMapping("/registrations/me")
+    @Operation(summary = "Get current user's registrations")
+    @ApiResponse(responseCode = "200", description = "List of registrations")
+    public List<RegistrationResponse> getMyRegistrations() {
+        String email = SecurityUtil.getCurrentEmail();
+        UserResponse user = userService.getByEmail(email);
+        return registrationService.getByUserId(user.id());
+    }
+
     // ===================== EVENT REGISTRATIONS =====================
 
     @GetMapping("/events/{eventId}/registrations")
