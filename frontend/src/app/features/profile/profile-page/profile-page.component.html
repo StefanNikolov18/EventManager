@@ -13,7 +13,76 @@
     </div>
   </div>
 
-  <!-- My Events Section -->
+  <!-- My Tickets Section (registrations + tickets) -->
+  <div class="events-section">
+    <h2>My Tickets</h2>
+
+    @if (ticketsLoading) {
+      <p class="loading-text">Loading your tickets...</p>
+    } @else if (ticketsError) {
+      <p class="error-text">{{ ticketsError }}</p>
+    } @else if (enrichedRegistrations.length === 0) {
+      <div class="empty-state">
+        <p>You haven't registered for any events yet.</p>
+        <a routerLink="/events" class="create-link">Browse Events</a>
+      </div>
+    } @else {
+      <div class="events-table-wrapper">
+        <table class="events-table">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Ticket</th>
+              <th>Entry Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of enrichedRegistrations; track item.registration.id) {
+              <tr>
+                <td class="td-title">
+                  @if (item.event) {
+                    {{ item.event.title }}
+                    <br><span class="venue-subtitle">{{ item.event.venue }}</span>
+                  } @else {
+                    Event #{{ item.registration.eventId }}
+                  }
+                </td>
+                <td>
+                  @if (item.event) {
+                    {{ item.event.startTime | date:'mediumDate' }}
+                  } @else {
+                    —
+                  }
+                </td>
+                <td>
+                  <span class="status-badge" [class.confirmed]="item.registration.status === 'CONFIRMED'"
+                        [class.cancelled]="item.registration.status === 'CANCELLED'"
+                        [class.pending]="item.registration.status === 'PENDING'">
+                    {{ item.registration.status }}
+                  </span>
+                </td>
+                <td>
+                  @if (item.ticket) {
+                    <span class="ticket-price">
+                      {{ item.ticket.price | number:'1.2-2' }} {{ item.ticket.currency || '' }}
+                    </span>
+                    <br><span class="ticket-id">Ticket #{{ item.ticket.id }}</span>
+                  } @else {
+                    <span class="no-ticket">—</span>
+                  }
+                </td>
+                <td class="entry-code">{{ item.registration.entryCode }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- My Events Section (organized) -->
   <div class="events-section">
     <h2>My Events</h2>
 

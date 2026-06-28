@@ -163,3 +163,57 @@
 .no-categories {
   color: #999;
 }
+
+/* ── My Tickets section ── */
+.venue-subtitle {
+  font-size: 12px;
+  color: #888;
+  font-weight: 400;
+}
+
+.entry-code {
+  font-family: monospace;
+  font-size: 12px;
+  color: #555;
+  max-width: 140px;
+  word-break: break-all;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.pending {
+  background: #fff8e1;
+  color: #f57f17;
+}
+
+.status-badge.confirmed {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.cancelled {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+.ticket-price {
+  font-weight: 600;
+  color: #1565c0;
+  font-size: 14px;
+}
+
+.ticket-id {
+  font-size: 11px;
+  color: #999;
+}
+
+.no-ticket {
+  color: #bbb;
+}

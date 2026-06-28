@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { EventService } from '../../../core/services/event.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -11,7 +11,7 @@ import { EventResponse, EventRequest, Category } from '../../../core/models/even
 @Component({
   selector: 'app-events-page',
   standalone: true,
-  imports: [FormsModule, DatePipe, RouterLink],
+  imports: [FormsModule, DatePipe, DecimalPipe, RouterLink],
   templateUrl: './events-page.component.html',
   styleUrl: './events-page.component.css'
 })
@@ -154,7 +154,8 @@ export class EventsPageComponent implements OnInit, OnDestroy {
       capacity: event.capacity,
       availableTickets: event.availableTickets,
       categoryIds: [],
-      ticketPrice: event.ticketPrice ?? 0
+      ticketPrice: event.ticketPrice ?? 0,
+      currency: event.currency ?? null
     };
     this.isFreeEvent.set((event.ticketPrice ?? 0) === 0);
     this.showModal.set(true);
@@ -192,6 +193,7 @@ export class EventsPageComponent implements OnInit, OnDestroy {
     }
 
     const ticketPrice = this.isFreeEvent() ? 0 : parseFloat(byId('ticketPriceInput')?.value || '0');
+    const currency = this.isFreeEvent() ? null : (document.getElementById('currencyInput') as HTMLSelectElement)?.value || 'EUR';
 
     const body: EventRequest = {
       title,
@@ -202,7 +204,8 @@ export class EventsPageComponent implements OnInit, OnDestroy {
       availableTickets,
       description,
       categoryIds,
-      ticketPrice
+      ticketPrice,
+      currency
     };
 
     console.log('Saving event:', JSON.stringify(body));
@@ -242,6 +245,84 @@ export class EventsPageComponent implements OnInit, OnDestroy {
   canEdit(event: EventResponse): boolean {
     const user = this.authService.currentUser();
     return user != null && (user.role === 'ADMIN' || user.id === event.organizerId);
+  }
+
+  // ── enroll in event (register + optionally buy ticket) ──
+  successMessage = signal('');
+  enrolling = signal<number | null>(null); // eventId being enrolled in
+
+  enrollInEvent(event: EventResponse) {
+    if (this.enrolling() !== null) return; // already in progress
+    this.enrolling.set(event.id);
+    this.successMessage.set('');
+
+    const isPaid = event.ticketPrice > 0;
+
+    this.eventService.registerForEvent(event.id).subscribe({
+      next: () => {
+        // registration created → now create the ticket
+        this.createTicket(event, isPaid);
+      },
+      error: (err) => {
+        // if already registered, registration exists → still try to create ticket
+        const errMsg = (err.error?.message || err.message || '').toLowerCase();
+        if (errMsg.includes('already registered')) {
+          this.createTicket(event, isPaid);
+        } else {
+          this.enrolling.set(null);
+          console.error('Registration failed:', err);
+          alert(errMsg);
+        }
+      }
+    });
+  }
+
+  private createTicket(event: EventResponse, isPaid: boolean) {
+    this.eventService.buyTicket(event.id).subscribe({
+      next: () => {
+        this.enrolling.set(null);
+        const msg = isPaid
+          ? `Successfully purchased ticket for "${event.title}"!`
+          : `Successfully registered for "${event.title}"!`;
+        this.successMessage.set(msg);
+        this.loadEvents();
+        this.clearSuccessAfterDelay();
+      },
+      error: (err) => {
+        console.error('Ticket creation failed:', err);
+        this.enrolling.set(null);
+        const errMsg = err.error?.message || err.message || '';
+        if (errMsg.includes('already exists')) {
+          // ticket already exists → success
+          this.successMessage.set(
+            isPaid
+              ? `Already have a ticket for "${event.title}"!`
+              : `Already registered for "${event.title}"!`
+          );
+          this.clearSuccessAfterDelay();
+        } else {
+          alert('Ticket creation failed: ' + errMsg);
+        }
+        this.loadEvents();
+      }
+    });
+  }
+
+  private clearSuccessAfterDelay() {
+    setTimeout(() => this.successMessage.set(''), 4000);
+  }
+
+  isOrganizer(event: EventResponse): boolean {
+    const user = this.authService.currentUser();
+    return user != null && user.id === event.organizerId;
+  }
+
+  canEnroll(event: EventResponse): boolean {
+    const user = this.authService.currentUser();
+    if (!user) return false;
+    if (user.id === event.organizerId) return false; // can't register for own event
+    if (event.availableTickets <= 0) return false;
+    return true;
   }
 
   searchEventById() {
@@ -299,6 +380,7 @@ function emptyRequest(): EventRequest {
     capacity: 100,
     availableTickets: 100,
     categoryIds: [],
-    ticketPrice: 0
+    ticketPrice: 0,
+    currency: null
   };
 }

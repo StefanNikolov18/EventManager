@@ -10,6 +10,23 @@ export interface EventResponse {
   availableTickets: number;
   categories: string[];
   ticketPrice: number;
+  currency: string | null;
+}
+
+export interface RegistrationResponse {
+  id: number;
+  eventId: number;
+  userId: number;
+  status: string;
+  registrationDate: string;
+  entryCode: string;
+}
+
+export interface TicketResponse {
+  id: number;
+  registrationId: number;
+  price: number;
+  currency: string;
 }
 
 export interface EventRequest {
@@ -22,6 +39,7 @@ export interface EventRequest {
   availableTickets: number;
   categoryIds: number[];
   ticketPrice: number;
+  currency: string | null;
 }
 
 export interface PageResponse<T> {

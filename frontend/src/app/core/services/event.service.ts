@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { EventResponse, EventRequest, PageResponse, Category } from '../models/event.model';
+import { EventResponse, EventRequest, PageResponse, Category, RegistrationResponse, TicketResponse } from '../models/event.model';
 
 @Injectable({ providedIn: 'root' })
 export class EventService {
@@ -48,5 +48,25 @@ export class EventService {
 
   getCategories(): Observable<Category[]> {
     return this.http.get<Category[]>('/api/categories');
+  }
+
+  // ===================== REGISTRATIONS =====================
+
+  registerForEvent(eventId: number): Observable<RegistrationResponse> {
+    return this.http.post<RegistrationResponse>(`/events/${eventId}/registrations`, {});
+  }
+
+  getMyRegistrations(): Observable<RegistrationResponse[]> {
+    return this.http.get<RegistrationResponse[]>('/registrations/me');
+  }
+
+  // ===================== TICKETS =====================
+
+  buyTicket(eventId: number): Observable<TicketResponse> {
+    return this.http.post<TicketResponse>(`/events/${eventId}/tickets`, {});
+  }
+
+  getMyTickets(): Observable<TicketResponse[]> {
+    return this.http.get<TicketResponse[]>('/tickets/me');
   }
 }
