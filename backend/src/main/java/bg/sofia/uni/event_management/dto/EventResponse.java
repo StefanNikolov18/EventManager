@@ -1,7 +1,9 @@
 package bg.sofia.uni.event_management.dto;
 
 import bg.sofia.uni.event_management.model.Event;
+import bg.sofia.uni.event_management.model.enums.Currency;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,6 +18,8 @@ public record EventResponse(
     LocalDateTime endTime,
     Integer capacity,
     Integer availableTickets,
+    BigDecimal ticketPrice,
+    Currency currency,
     Set<String> categories
 ) {
 
@@ -30,6 +34,8 @@ public record EventResponse(
             event.getEndTime(),
             event.getCapacity(),
             event.getAvailableTickets(),
+            event.getTicketPrice(),
+            event.getCurrency(),
             event.getCategories()
                 .stream()
                 .map(category -> category.getCategoryName())
