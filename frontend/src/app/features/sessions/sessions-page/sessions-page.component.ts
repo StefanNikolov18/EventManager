@@ -169,6 +169,14 @@ export class SessionsPageComponent implements OnInit {
       return;
     }
 
+    const hasMaterial = this.formMaterialUrl.trim().length > 0;
+    const validSpeakers = this.formSpeakers.filter(s => s.name.trim());
+
+    if (hasMaterial && validSpeakers.length === 0) {
+      alert('Please add at least one speaker if you want to attach a presentation material.');
+      return;
+    }
+
     this.saving.set(true);
 
     const startDateTime = this.formDate + 'T' + this.formStartTime + ':00';
@@ -204,11 +212,7 @@ export class SessionsPageComponent implements OnInit {
     } else {
       this.sessionService.createSession(this.eventId(), body).subscribe({
         next: savedSession => {
-          // Save speakers after session is created
-          const validSpeakers = this.formSpeakers.filter(s => s.name.trim());
-          const hasMaterial = this.formMaterialUrl.trim().length > 0;
-
-          if (validSpeakers.length === 0 && !hasMaterial) {
+          if (validSpeakers.length === 0) {
             this.closeModal();
             this.saving.set(false);
             this.loadSessions();
@@ -220,7 +224,6 @@ export class SessionsPageComponent implements OnInit {
           const total = validSpeakers.length;
 
           const finish = () => {
-            // If material URL is set, save it for the first speaker
             if (hasMaterial && speakerIds.length > 0) {
               this.materialService.createMaterial(speakerIds[0], {
                 speakerId: speakerIds[0],
@@ -235,6 +238,7 @@ export class SessionsPageComponent implements OnInit {
                 },
                 error: (err) => {
                   console.error('Failed to save material', err);
+                  alert('Session created, but failed to save presentation material: ' + (err.error?.message || err.message || 'Unknown error'));
                   this.closeModal();
                   this.saving.set(false);
                   this.loadSessions();
@@ -246,11 +250,6 @@ export class SessionsPageComponent implements OnInit {
               this.loadSessions();
             }
           };
-
-          if (total === 0) {
-            finish();
-            return;
-          }
 
           validSpeakers.forEach(speaker => {
             const req: SpeakerRequest = {
