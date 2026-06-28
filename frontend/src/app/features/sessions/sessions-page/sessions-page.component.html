@@ -1,0 +1,204 @@
+<div class="sessions-page">
+  <!-- ── header ── -->
+  <div class="page-header">
+    <div>
+      <a class="back-link" routerLink="/events">← Back to Events</a>
+      <h1>
+        @if (event(); as ev) {
+          Sessions: {{ ev.title }}
+        } @else {
+          Sessions
+        }
+      </h1>
+    </div>
+    @if (canManage(event())) {
+      <button class="btn btn-primary" (click)="openCreateModal()">+ Add Session</button>
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <p class="error-text">{{ errorMessage() }}</p>
+  }
+
+  <!-- ── sessions list ── -->
+  @if (loading()) {
+    <p class="loading">Loading sessions…</p>
+  } @else if (sessions().length === 0) {
+    <div class="empty-state">
+      <p class="empty">No sessions yet.</p>
+      @if (canManage(event())) {
+        <p class="empty-hint">Click "+ Add Session" to create the first session for this event.</p>
+      }
+    </div>
+  } @else {
+    <div class="sessions-list">
+      @for (session of sessions(); track session.id) {
+        <div class="session-card">
+          <div class="session-header">
+            <span class="session-order">#{{ session.orderIndex }}</span>
+            <span class="session-type-badge" [class]="'type-' + session.type.toLowerCase()">{{ session.type }}</span>
+            @if (canManage(event())) {
+              <div class="session-actions">
+                <button class="btn btn-sm btn-outline" (click)="openEditModal(session)">Edit</button>
+                <button class="btn btn-sm btn-danger" (click)="deleteSession(session.id)">Delete</button>
+              </div>
+            }
+          </div>
+          <h3 class="session-title">{{ session.title }}</h3>
+          @if (session.description) {
+            <p class="session-desc">{{ session.description }}</p>
+          }
+          <div class="session-meta">
+            <span class="meta-item">
+              <strong>Start:</strong> {{ session.startTime | date:'MMM d, y, HH:mm' }}
+            </span>
+            <span class="meta-item">
+              <strong>End:</strong> {{ session.endTime | date:'MMM d, y, HH:mm' }}
+            </span>
+            @if (session.locationRoom) {
+              <span class="meta-item">
+                <strong>Room:</strong> {{ session.locationRoom }}
+              </span>
+            }
+            @if (session.speakers && session.speakers.length > 0) {
+              <span class="meta-item">
+                <strong>Speakers:</strong>
+                {{ getSpeakerNames(session.speakers) }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── create / edit modal ── -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h2>{{ isEditing() ? 'Edit Session' : 'Add Session' }}</h2>
+
+        <label>
+          Title *
+          <input type="text" [(ngModel)]="formTitle" />
+        </label>
+
+        <label>
+          Description
+          <textarea [(ngModel)]="formDescription"></textarea>
+        </label>
+
+        <div class="modal-row">
+          <label>
+            Date *
+            <input type="date" [(ngModel)]="formDate" />
+          </label>
+        </div>
+
+        <div class="modal-row">
+          <label>
+            Start Time
+            <input type="time" [(ngModel)]="formStartTime" />
+          </label>
+          <label>
+            End Time
+            <input type="time" [(ngModel)]="formEndTime" />
+          </label>
+        </div>
+
+        <div class="modal-row">
+          <label>
+            Room / Location
+            <input type="text" [(ngModel)]="formLocation" />
+          </label>
+          <label>
+            Order
+            <input type="number" [(ngModel)]="formOrderIndex" min="1" />
+          </label>
+        </div>
+
+        <label>
+          Session Type
+          <select [(ngModel)]="formType">
+            @for (t of sessionTypes; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </label>
+
+        <!-- ── Speakers section ── -->
+        <div class="form-section">
+          <div class="section-header">
+            <h3>Speakers</h3>
+            <button type="button" class="btn btn-sm btn-outline" (click)="addSpeaker()">+ Add Speaker</button>
+          </div>
+
+          @if (formSpeakers.length === 0) {
+            <p class="section-hint">No speakers added yet. Click "+ Add Speaker" to add one.</p>
+          }
+
+          @for (speaker of formSpeakers; track trackByIndex($index); let i = $index) {
+            <div class="speaker-block">
+              <div class="speaker-block-header">
+                <strong>Speaker {{ i + 1 }}</strong>
+                <button type="button" class="btn btn-sm btn-danger" (click)="removeSpeaker(i)">Remove</button>
+              </div>
+              <label>
+                Name *
+                <input type="text" [(ngModel)]="speaker.name" placeholder="Full name" />
+              </label>
+              <label>
+                Biography
+                <textarea [(ngModel)]="speaker.biography" placeholder="Brief bio (max 2000 chars)"></textarea>
+              </label>
+              <div class="modal-row">
+                <label>
+                  Company
+                  <input type="text" [(ngModel)]="speaker.companyName" placeholder="Company name" />
+                </label>
+                <label>
+                  Photo URL
+                  <input type="url" [(ngModel)]="speaker.photoUrl" placeholder="https://..." />
+                </label>
+              </div>
+              <label>
+                Website
+                <input type="url" [(ngModel)]="speaker.websiteUrl" placeholder="https://..." />
+              </label>
+            </div>
+          }
+        </div>
+
+        <!-- ── Presentation Material (optional) ── -->
+        <div class="form-section">
+          <div class="section-header">
+            <h3>Presentation Material <span class="optional-tag">optional</span></h3>
+          </div>
+          <p class="section-hint">Add a link to slides, PDF, or other presentation materials.</p>
+          <label>
+            File URL
+            <input type="url" [(ngModel)]="formMaterialUrl" placeholder="https://..." />
+          </label>
+          <label>
+            File Type
+            <select [(ngModel)]="formMaterialType">
+              <option value="">Select type</option>
+              <option value="PDF">PDF</option>
+              <option value="SLIDES">Slides (PPT/Google Slides)</option>
+              <option value="VIDEO">Video</option>
+              <option value="DOCUMENT">Document</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost" (click)="closeModal()">Cancel</button>
+          <button class="btn btn-primary" (click)="saveSession()" [disabled]="saving()">
+            {{ saving() ? 'Saving…' : isEditing() ? 'Update' : 'Create' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

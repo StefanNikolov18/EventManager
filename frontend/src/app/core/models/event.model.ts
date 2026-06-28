@@ -9,6 +9,7 @@ export interface EventResponse {
   capacity: number;
   availableTickets: number;
   categories: string[];
+  ticketPrice: number;
 }
 
 export interface EventRequest {
@@ -20,6 +21,7 @@ export interface EventRequest {
   capacity: number;
   availableTickets: number;
   categoryIds: number[];
+  ticketPrice: number;
 }
 
 export interface PageResponse<T> {

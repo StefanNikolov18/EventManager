@@ -30,5 +30,12 @@ export const routes: Routes = [
       import('./features/profile/profile-page/profile-page.component').then(m => m.ProfilePageComponent)
   },
 
+  {
+    path: 'events/:eventId/sessions',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/sessions/sessions-page/sessions-page.component').then(m => m.SessionsPageComponent)
+  },
+
   { path: '**', redirectTo: '/events' }
 ];

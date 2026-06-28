@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { EventService } from '../../../core/services/event.service';
@@ -10,13 +11,14 @@ import { EventResponse, EventRequest, Category } from '../../../core/models/even
 @Component({
   selector: 'app-events-page',
   standalone: true,
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, RouterLink],
   templateUrl: './events-page.component.html',
   styleUrl: './events-page.component.css'
 })
 export class EventsPageComponent implements OnInit, OnDestroy {
   private eventService = inject(EventService);
   private userService = inject(UserService);
+  private router = inject(Router);
   authService = inject(AuthService);
 
   private eventsSub?: Subscription;
@@ -41,6 +43,7 @@ export class EventsPageComponent implements OnInit, OnDestroy {
   isEditing = signal(false);
   editEventId: number | null = null;
   formData: EventRequest = emptyRequest();
+  isFreeEvent = signal(true);
 
   // ── admin ──
   users = signal<UserResponse[]>([]);
@@ -135,6 +138,7 @@ export class EventsPageComponent implements OnInit, OnDestroy {
     this.isEditing.set(false);
     this.editEventId = null;
     this.formData = emptyRequest();
+    this.isFreeEvent.set(true);
     this.showModal.set(true);
   }
 
@@ -149,8 +153,10 @@ export class EventsPageComponent implements OnInit, OnDestroy {
       endTime: event.endTime.substring(0, 16),
       capacity: event.capacity,
       availableTickets: event.availableTickets,
-      categoryIds: []
+      categoryIds: [],
+      ticketPrice: event.ticketPrice ?? 0
     };
+    this.isFreeEvent.set((event.ticketPrice ?? 0) === 0);
     this.showModal.set(true);
   }
 
@@ -185,6 +191,8 @@ export class EventsPageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const ticketPrice = this.isFreeEvent() ? 0 : parseFloat(byId('ticketPriceInput')?.value || '0');
+
     const body: EventRequest = {
       title,
       venue,
@@ -193,14 +201,18 @@ export class EventsPageComponent implements OnInit, OnDestroy {
       capacity,
       availableTickets,
       description,
-      categoryIds
+      categoryIds,
+      ticketPrice
     };
 
     console.log('Saving event:', JSON.stringify(body));
 
-    const onComplete = () => {
+    const onComplete = (savedEvent?: EventResponse) => {
       this.closeModal();
       this.loadEvents();
+      if (savedEvent) {
+        this.router.navigate(['/events', savedEvent.id, 'sessions']);
+      }
     };
     const onError = (err: any) => {
       console.error('Save failed', err);
@@ -209,12 +221,12 @@ export class EventsPageComponent implements OnInit, OnDestroy {
 
     if (this.isEditing() && this.editEventId) {
       this.eventService.updateEvent(this.editEventId, body).subscribe({
-        next: onComplete,
+        next: () => onComplete(),
         error: onError
       });
     } else {
       this.eventService.createEvent(body).subscribe({
-        next: onComplete,
+        next: savedEvent => onComplete(savedEvent),
         error: onError
       });
     }
@@ -286,6 +298,7 @@ function emptyRequest(): EventRequest {
     endTime: '',
     capacity: 100,
     availableTickets: 100,
-    categoryIds: []
+    categoryIds: [],
+    ticketPrice: 0
   };
 }
