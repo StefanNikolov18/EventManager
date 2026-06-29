@@ -14,6 +14,7 @@ import {
 import { EventResponse } from '../../../core/models/event.model';
 
 interface SpeakerForm {
+  id?: number;
   name: string;
   biography: string;
   companyName: string;
@@ -136,6 +137,7 @@ export class SessionsPageComponent implements OnInit {
     this.formType = session.type;
     // populate speakers from existing session
     this.formSpeakers = (session.speakers || []).map(s => ({
+      id: s.id,
       name: s.name,
       biography: s.biography || '',
       companyName: s.companyName || '',
@@ -182,7 +184,7 @@ export class SessionsPageComponent implements OnInit {
     const startDateTime = this.formDate + 'T' + this.formStartTime + ':00';
     const endDateTime = this.formDate + 'T' + this.formEndTime + ':00';
 
-    const body: SessionRequest = {
+    let body: SessionRequest = {
       title: this.formTitle,
       description: this.formDescription,
       startTime: startDateTime,
@@ -200,14 +202,75 @@ export class SessionsPageComponent implements OnInit {
     };
 
     if (this.isEditing() && this.editSessionId) {
-      // Update session, then create any new speakers
-      this.sessionService.updateSession(this.editSessionId, body).subscribe({
-        next: () => {
-          this.closeModal();
-          this.saving.set(false);
-          this.loadSessions();
-        },
-        error: onError
+      // ── Update session + reconcile speakers ──
+
+      if (validSpeakers.length === 0) {
+        // no speakers — just update with empty array
+        this.sessionService.updateSession(this.editSessionId!, body).subscribe({
+          next: () => {
+            this.closeModal();
+            this.saving.set(false);
+            this.loadSessions();
+          },
+          error: onError
+        });
+        return;
+      }
+
+      const speakerIds: number[] = [];
+      let completed = 0;
+      const total = validSpeakers.length;
+
+      const finishUpdate = () => {
+        body = { ...body, speakerIds };
+        this.sessionService.updateSession(this.editSessionId!, body).subscribe({
+          next: () => {
+            this.closeModal();
+            this.saving.set(false);
+            this.loadSessions();
+          },
+          error: onError
+        });
+      };
+
+      validSpeakers.forEach(speaker => {
+        const req: SpeakerRequest = {
+          name: speaker.name,
+          biography: speaker.biography,
+          companyName: speaker.companyName,
+          photoUrl: speaker.photoUrl,
+          websiteUrl: speaker.websiteUrl
+        };
+
+        if (speaker.id) {
+          // existing speaker — update in place
+          this.speakerService.updateSpeaker(speaker.id, req).subscribe({
+            next: () => {
+              speakerIds.push(speaker.id!);
+              completed++;
+              if (completed === total) finishUpdate();
+            },
+            error: (err) => {
+              console.error('Failed to update speaker', err);
+              completed++;
+              if (completed === total) finishUpdate();
+            }
+          });
+        } else {
+          // new speaker — create and associate with this session
+          this.speakerService.createSpeaker(this.editSessionId!, req).subscribe({
+            next: (created) => {
+              speakerIds.push(created.id);
+              completed++;
+              if (completed === total) finishUpdate();
+            },
+            error: (err) => {
+              console.error('Failed to create speaker', err);
+              completed++;
+              if (completed === total) finishUpdate();
+            }
+          });
+        }
       });
     } else {
       this.sessionService.createSession(this.eventId(), body).subscribe({

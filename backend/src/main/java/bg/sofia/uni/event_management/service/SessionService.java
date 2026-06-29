@@ -144,19 +144,8 @@ public class SessionService {
             throw new AccessDeniedException("Not allowed");
         }
 
-        // Collect speakers before clearing the relationship
-        Set<Speaker> speakers = new HashSet<>(session.getSpeakers());
-
         // Clear ManyToMany association to avoid FK constraint issues
         session.getSpeakers().clear();
-        sessionRepository.flush();
-
-        // Delete materials for each speaker (via DB cascade from speaker FK),
-        // then delete the speakers themselves
-        if (!speakers.isEmpty()) {
-            speakerRepository.deleteAll(speakers);
-            speakerRepository.flush();
-        }
 
         sessionRepository.delete(session);
     }

@@ -4,7 +4,7 @@ import bg.sofia.uni.event_management.exceptions.AccessDeniedException;
 import bg.sofia.uni.event_management.exceptions.NotFoundException;
 import bg.sofia.uni.event_management.web.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.coyote.BadRequestException;
+import bg.sofia.uni.event_management.exceptions.BadRequestException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
